@@ -20,10 +20,28 @@ public class Scanner {
 
     static {
         keywords = new HashMap<>();
-        keywords.put("method",    TokenType.METHOD);
-        keywords.put("while",  TokenType.WHILE);
-        keywords.put("if",   TokenType.IF);
-    }
+        keywords.put("while", TokenType.WHILE);
+        keywords.put("int", TokenType.INT);
+        keywords.put("class", TokenType.CLASS);
+        keywords.put("constructor", TokenType.CONSTRUCTOR);
+        keywords.put("function", TokenType.FUNCTION);
+        keywords.put("method", TokenType.METHOD);
+        keywords.put("field", TokenType.FIELD);
+        keywords.put("static", TokenType.STATIC);
+        keywords.put("var", TokenType.VAR);
+        keywords.put("char", TokenType.CHAR);
+        keywords.put("boolean", TokenType.BOOLEAN);
+        keywords.put("void", TokenType.VOID);
+        keywords.put("true", TokenType.TRUE);
+        keywords.put("false", TokenType.FALSE);
+        keywords.put("null", TokenType.NULL);
+        keywords.put("this", TokenType.THIS);
+        keywords.put("let", TokenType.LET);
+        keywords.put("do", TokenType.DO);
+        keywords.put("if", TokenType.IF);
+        keywords.put("else", TokenType.ELSE);
+        keywords.put("return", TokenType.RETURN);
+  }
 
     
     public Scanner (byte[] input) {
@@ -31,6 +49,40 @@ public class Scanner {
         current = 0;
         start = 0;
     }
+
+    private void skipLineComments() {
+        for (char ch = peek(); ch != '\n' && ch != 0;  advance(), ch = peek()) ;
+    }
+
+    private void skipBlockComments() {
+        boolean endComment = false;
+        advance();
+        while (!endComment) {
+            advance();
+            char ch = peek();
+            if ( ch == 0) { // eof, lexical error
+                System.exit(1);
+            }
+         
+            if (ch == '*') {
+               for (ch = peek(); ch == '*';  advance(), ch = peek()) ;
+                if (ch == '/') {
+                    endComment = true;
+                    advance();
+                }
+            }
+
+        }
+    }
+
+    private char peekNext () {
+        int next = current + 1;
+        if ( next  < input.length) {
+            return (char)input[next];
+        } else {
+            return 0;
+        }
+   }
 
     private void skipWhitespace() {
         char ch = peek();
@@ -57,12 +109,75 @@ public class Scanner {
         }
 
         switch (ch) {
+
+                  case '*':
+                      advance();
+                      return new Token (TokenType.ASTERISK,"*"); 
+                  case '.':
+                      advance();
+                      return new Token (TokenType.DOT,"."); 
+                  case '&':
+                      advance();
+                      return new Token (TokenType.AND,"&"); 
+                  case '|':
+                      advance();
+                      return new Token (TokenType.OR,"|"); 
+                  case '~':
+                      advance();
+                      return new Token (TokenType.NOT,"~"); 
+      
+                  case '>':
+                      advance();
+                      return new Token (TokenType.GT,">"); 
+                  case '<':
+                      advance();
+                      return new Token (TokenType.LT,"<"); 
+                  case '=':
+                      advance();
+                      return new Token (TokenType.EQ,"="); 
+              
+                  case '(':
+                      advance();
+                      return new Token (TokenType.LPAREN,"("); 
+                  case ')':
+                      advance();
+                      return new Token (TokenType.RPAREN,")"); 
+                  case '{':
+                      advance();
+                      return new Token (TokenType.LBRACE,"{"); 
+                  case '}':
+                      advance();
+                      return new Token (TokenType.RBRACE,"}"); 
+                  case '[':
+                      advance();
+                      return new Token (TokenType.LBRACKET,"["); 
+                  case ']':
+                      advance();
+                      return new Token (TokenType.RBRACKET,"]"); 
+                  case ';':
+                      advance();
+                      return new Token (TokenType.SEMICOLON,";"); 
+                  case ',':
+                      advance();
+                      return new Token (TokenType.COMMA,",");
             case '+':
                 advance();
                 return new Token (PLUS,"+");
             case '-':
                 advance();
                 return new Token (MINUS,"-");
+                case '/':
+                if (peekNext() == '/') {
+                    skipLineComments();
+                    return nextToken();
+                } else if (peekNext() == '*') {
+                    skipBlockComments();
+                    return nextToken();
+                }
+                else {
+                    advance();
+                    return new Token (TokenType.SLASH,"/");
+                }
             case '"':
                 return string();
             case 0:

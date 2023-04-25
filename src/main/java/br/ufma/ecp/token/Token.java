@@ -10,9 +10,10 @@ public class Token {
     }
 
     public String toString() {
+        String categoria = type.toString()
         var type = this.type.toString();
         if (type.equals("NUMBER"))
-            type =  "intConst";
+            type =  "integerConstant";
 
         if (type.equals("STRING"))
             type =  "stringConst";
@@ -27,7 +28,7 @@ public class Token {
             type = "keyword";
     
 
-        return "<"+ type +">" + lexeme + "</"+ type + ">";
+        return "<"+ type +"> " + lexeme + " </"+ type + ">";
     }
     
 }
